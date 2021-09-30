@@ -18,7 +18,7 @@ const secretField = process.env.AUTH_0_SECRET_FIELD
 // to verify JWT token signature.
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
 const jwksUrl = 'https://dev-c7kofl0p.us.auth0.com/.well-known/jwks.json'
-
+console.log(jwksUrl)
 export const handler = async (
   event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
@@ -61,14 +61,15 @@ export const handler = async (
 
 async function getAuthOSecret() {
   if (cachedAuth0Secret) {
-    logger.info('Using cached secret')
-    return cachedAuth0Secret
+    logger.info('Using cached secret', cachedAuth0Secret)
+    return JSON.parse(cachedAuth0Secret)
   }
   const data = await client.getSecretValue({ SecretId: secretId }).promise()
 
   logger.info('Successfully retrieved the auth0 secret', data)
+  cachedAuth0Secret = data.SecretString
 
-  return cachedAuth0Secret
+  return JSON.parse(cachedAuth0Secret)
 }
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
